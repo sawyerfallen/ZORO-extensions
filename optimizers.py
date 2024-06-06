@@ -113,7 +113,7 @@ class ZORO(BaseOptimizer):
         if self.sampling == "rademacher":
             Z = Z/np.sqrt(num_samples)
         elif self.sampling == "sjlt" or self.sampling == "countsketch":
-            Z = Z/np.sqrt(self.sparsity)
+            Z = Z/np.sqrt(num_samples) # Z/np.sqrt(self.sparsity) empirically see much better performance using this normalization. why?
         grad_estimate = cosamp(Z, y, sparsity, tol, maxiterations)
         
     

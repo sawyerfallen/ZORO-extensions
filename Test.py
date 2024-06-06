@@ -21,7 +21,7 @@ import copy
 n = 2000
 s = int(0.1*n)
 noiseamp = 0.001 # noise amplitude
-obj_func = SparseQuadric(n, s, noiseamp)
+obj_func = MaxK(n, s, noiseamp)
 
 # Choose initialization                                                         
 x0    = np.random.randn(n)
@@ -38,15 +38,15 @@ params = {"step_size":1.0, "delta": 0.0001, "max_cosamp_iter": 10,
 
 params_sjlt = {"step_size":1.0, "delta": 0.0001, "max_cosamp_iter": 10, 
           "cosamp_tol": 0.5,"sparsity": sparsity,
-          "num_samples": int(np.ceil(np.log(len(x0))*sparsity)), "sampling": "countsketch"}
+          "num_samples": int(np.ceil(np.log(len(x0))*sparsity)), "sampling": "sjlt"}
 
 performance_log_ZORO = [[0, obj_func(x0)]]
 performance_log_ZORO_sjlt = [[0, obj_func(x0)]]
 
 
 # initialize optimizer object
-opt  = ZORO(x0, obj_func, params, function_budget= int(1e6))
-opt_sjlt  = ZORO(x0, obj_func, params_sjlt, function_budget= int(1e6))
+opt  = ZORO(x0, obj_func, params, function_budget= int(1e5))
+opt_sjlt  = ZORO(x0, obj_func, params_sjlt, function_budget= int(1e5))
 
 
 # the actual optimization routine
@@ -66,7 +66,7 @@ while termination is False:
     # save some useful values
     performance_log_ZORO.append( [evals_ZORO,np.mean(opt.fd)] )
     # print some useful values
-    opt.report( 'Estimated f(x_k): %f  function evals: %d\n' %
+    opt.report( 'Estimated f(x_k) using ZORO: %f  function evals: %d\n' %
         (np.mean(opt.fd), evals_ZORO) )
    
 
@@ -86,7 +86,7 @@ while termination_sjlt is False:
     # save some useful values
     performance_log_ZORO_sjlt.append( [evals_ZORO_sjlt,np.mean(opt_sjlt.fd)] )
     # print some useful values
-    opt_sjlt.report( 'Estimated f(x_k): %f  function evals: %d\n' %
+    opt_sjlt.report( 'Estimated f(x_k) using ZORO-sjlt: %f  function evals: %d\n' %
         (np.mean(opt_sjlt.fd), evals_ZORO_sjlt) )
 
 fig, ax = plt.subplots()
@@ -94,8 +94,8 @@ fig, ax = plt.subplots()
 ax.plot(np.array(performance_log_ZORO)[:,0],
  np.log10(np.array(performance_log_ZORO)[:,1]), linewidth=1, label = "ZORO")
 ax.plot(np.array(performance_log_ZORO_sjlt)[:,0],
- np.log10(np.array(performance_log_ZORO_sjlt)[:,1]), linewidth=1, label = "ZORO with countsketch")
+ np.log10(np.array(performance_log_ZORO_sjlt)[:,1]), linewidth=1, label = "ZORO with sjlt")
 plt.xlabel('function evaluations')
 plt.ylabel('$log($f(x)$)$')
 leg = ax.legend()
-plt.show()
+plt.savefig('results/sjlt-vs-rademacher-on-maxk.png')
