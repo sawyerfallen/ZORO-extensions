@@ -35,10 +35,44 @@ class ZORO(BaseOptimizer):
         self.sparsity = params["sparsity"]
         self.step_size = params["step_size"]
         self.num_samples = params["num_samples"]
+        self.sampling = params["sampling"]
         self.prox = prox
         # Define sampling matrix
         # TODO (?): add support for other types of random sampling directions
-        Z = 2*(np.random.rand(self.num_samples, self.n) > 0.5) - 1
+        
+
+
+        if self.sampling == "rademacher":
+            Z = 2*(np.random.rand(self.num_samples, self.n) > 0.5) - 1
+            print(Z.shape)
+        elif self.sampling == "sjlt":
+            sigma = 2*(np.random.rand(self.num_samples, self.n) > 0.5)-1
+            delt = np.zeros((self.num_samples, self.n), dtype=int)
+            for row in range(self.num_samples):
+                ones_positions = np.random.choice(self.n, self.sparsity, replace=False)
+                delt[row, ones_positions] = 1 
+            Z = sigma*delt
+        elif self.sampling == "countsketch":
+            sigma = 2*(np.random.rand(self.num_samples, self.n) > 0.5)-1
+            delt = np.zeros((self.num_samples, self.n), dtype=int)
+            for row in range(self.num_samples):
+                ones_positions = []
+                partsize = np.floor(self.n/self.sparsity)
+                startpart = 0
+                endpart = partsize
+                while endpart <= self.n:
+                    if (endpart + partsize) > self.n:
+                        endpart = self.n
+                    ones_positions.append(np.random.randint(startpart, endpart))
+                    startpart += partsize
+                    if endpart == self.n:
+                        endpart += 1
+                    else:
+                        endpart += partsize
+                delt[row, np.asarray(ones_positions)] = 1
+            Z = sigma*delt
+
+ 
 
         cosamp_params = {"Z": Z, "delta": self.delta, "maxiterations": 10,
                          "tol": 0.5, "sparsity": self.sparsity}
@@ -76,7 +110,10 @@ class ZORO(BaseOptimizer):
             
         function_estimate = function_estimate/num_samples
         
-        Z = Z/np.sqrt(num_samples)
+        if self.sampling == "rademacher":
+            Z = Z/np.sqrt(num_samples)
+        elif self.sampling == "sjlt" or self.sampling == "countsketch":
+            Z = Z/np.sqrt(self.sparsity)
         grad_estimate = cosamp(Z, y, sparsity, tol, maxiterations)
         
     
