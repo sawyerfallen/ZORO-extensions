@@ -57,3 +57,48 @@ class CompressibleQuadric(object):
         #f_no_noise += 1e-4*np.dot(x[self.s:self.dim],x[self.s:self.dim])
         #return f_no_noise + self.noiseamp*self.rng.randn()
     
+class SingularSS(object):
+    '''An implementation of the sum of squares of r singular values.'''
+    def __init__(self, in_shape, r, noiseamp):
+        self.noiseamp = noiseamp/np.sqrt(np.prod(in_shape))
+        self.in_shape = in_shape
+        self.r = r
+        self.rng = np.random.RandomState()
+
+    def __call__(self, x):
+        assert x.shape == self.in_shape
+        singular_vals = np.linalg.svd(x, compute_uv=False)
+        f_no_noise = np.dot(singular_vals[:self.r], singular_vals[:self.r])/2
+        return f_no_noise + self.noiseamp*self.rng.randn()
+    
+    def grad(self, x):
+        assert x.shape == self.in_shape
+        U, s, Vh = np.linalg.svd(x)
+        return U[:, :self.r] @ np.diag(s[:self.r]) @ Vh[:self.r, :]
+    
+
+if __name__ == '__main__':
+    # Parameters
+    n = 100
+    s = 10
+    decay_factor = 0.1
+    noiseamp = 1.0
+    in_shape = (10, 10)
+    r = 5
+
+    # Random input
+    x1 = np.random.randn(n)
+    x2 = np.random.randn(*in_shape)
+
+    # Initialize functions
+    sq = SparseQuadric(n, s, noiseamp)
+    mk = MaxK(n, s, noiseamp)
+    cq = CompressibleQuadric(n, decay_factor, noiseamp)
+    ss = SingularSS(in_shape, r, noiseamp)
+
+    # Test cases
+    print("SparseQuadric Test Output: ", sq(x1))
+    print("MaxK Test Output: ", mk(x1))
+    print("CompressibleQuadric Test Output: ", cq(x1))
+    print("SingularSSD Test Output: ", ss(x2))
+    print("SingularSS grad Test Output: ", ss.grad(x2))
