@@ -2,24 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from benchmarkfunctions import *
+from tensor_utils import *
 
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "sans-serif",
     "font.sans-serif": "Helvetica",
 })
-
-def contract_first_indices(x,T):
-   xstr = ''.join([chr(65+i) for i in range(len(x.shape))])
-   Tstr = ''.join([chr(65+i) for i in range(len(T.shape))])
-
-   return np.einsum(xstr+','+Tstr+'->'+Tstr[len(xstr):], x, T)
-
-def contract_last_indices(x,T):
-   Tstr = ''.join([chr(65+i) for i in range(len(T.shape))])
-   xstr = Tstr[-len(x.shape):]
-
-   return np.einsum(xstr+','+Tstr+'->'+Tstr[:len(xstr)], x, T)
    
 
 def plot_derivative_check(f,grad,x,v,title=None, print_log = False, show = False, fname = None): 

@@ -6,6 +6,7 @@ All of them exhibit gradient sparsity or compressibility.
 import numpy as np
 #import sys
 import math
+from tensor_utils import *
 
 class SparseQuadric(object):
     '''An implementation of the sparse quadric function.'''
@@ -76,6 +77,11 @@ class SingularSS(object):
         U, s, Vh = np.linalg.svd(x)
         return U[:, :self.r] @ np.diag(s[:self.r]) @ Vh[:self.r, :]
     
+    def fwd(self,x,v):
+        assert x.shape == self.in_shape
+        assert v.shape == self.in_shape
+        return self(x), contract_first_indices(v, self.grad(x))
+    
 
 if __name__ == '__main__':
     # Parameters
@@ -89,6 +95,7 @@ if __name__ == '__main__':
     # Random input
     x1 = np.random.randn(n)
     x2 = np.random.randn(*in_shape)
+    v = np.random.randn(*in_shape)
 
     # Initialize functions
     sq = SparseQuadric(n, s, noiseamp)
@@ -100,5 +107,6 @@ if __name__ == '__main__':
     print("SparseQuadric Test Output: ", sq(x1))
     print("MaxK Test Output: ", mk(x1))
     print("CompressibleQuadric Test Output: ", cq(x1))
-    print("SingularSSD Test Output: ", ss(x2))
+    print("SingularSS Test Output: ", ss(x2))
     print("SingularSS grad Test Output: ", ss.grad(x2))
+    print("SingularSS fwd Test Output: ", ss.fwd(x2,v))
