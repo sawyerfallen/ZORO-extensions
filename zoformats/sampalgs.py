@@ -22,7 +22,7 @@ def argMinVT(A, U, y):
     Avecs = A.reshape(A.shape[0], A.shape[1]*A.shape[2])
     AIkU = jnp.matmul(Avecs, IkU)
     VTvec = jnp.linalg.lstsq(AIkU, y)
-    return VTvec.reshape(U.shape[1], A.shape[2])
+    return VTvec[0].reshape(U.shape[1], A.shape[2])
 
     
 def argMinU(A, VT, y):
@@ -30,7 +30,7 @@ def argMinU(A, VT, y):
     Avecs = A.reshape(A.shape[0], A.shape[1]*A.shape[2])
     AVkI = jnp.matmul(Avecs, VkI)
     Uvec = jnp.linalg.lstsq(AVkI, y)
-    return Uvec.reshape(A.shape[1], VT.shape[0])
+    return Uvec[0].reshape(A.shape[1], VT.shape[0])
 
 #alternating projections
 #y is vector
