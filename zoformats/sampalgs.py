@@ -39,15 +39,16 @@ def argMinU(A, VT, y):
 def altProj(y, A, r, iters):
     
     #initialization from Jain et al
-    
-    y_r = y[:r]
-    A_r = A[:r]
-    absum = jnp.sum(y_r[:, None, None] * A_r, axis=0)
+
+    absum = jnp.sum(y[:, None, None] * A, axis=0)
+    #print(absum.shape)
     U, S, VH = jnp.linalg.svd(absum, full_matrices=True)
+    U = U[:,:r]
+   # print(U.shape)
 
     for i in range(iters):
         VT = argMinVT(A, U, y)
         U = argMinU(A, VT, y)
     
-
+    #print((U@VT).shape)
     return U@VT

@@ -9,7 +9,7 @@ from jax import random
 #params
 
 #step size
-alpha = 0.5
+alpha = 0.00000005
 
 #iterations
 K = 1000
@@ -19,12 +19,12 @@ m = 5
 n = 5
 
 #rank
-r = 3
+r = 2
 
 #number of sampling directions
 num_samples = 3
 
-h = 0.0001
+h = 0.001
 
 tol = 10**(-6)
 
@@ -45,6 +45,7 @@ normvec = [0] * K
 normvec[0] = jnp.linalg.norm(X)
 
 for k in range(1, K+1):
+    print(k)
     key, subkey = random.split(key)
 
     Z = random.normal(subkey, shape=(num_samples, m, n))
@@ -52,22 +53,25 @@ for k in range(1, K+1):
     X_plus_hZ = X[None, :, :] + h * Z
     
     
+    
     f_vmap = jax.vmap(f, in_axes=0)
 
     f_XhZ = f_vmap(X_plus_hZ)  
     f_X = f(X) 
+
     
     y = (f_XhZ - f_X) / h 
+    #print(y.shape)
 
 
     #low rank alg - alternating projections
     gradfEst = sampalgs.altProj(y, Z, r, altProjiters)
+    
 
     #low rank alg - iht
-
-    #step
     X = X - alpha*gradfEst
-    if(jnp.linalg.norm(gradfEst) < tol):
+    print(f(X))
+    if(f(X) < tol):
         break
 
 
