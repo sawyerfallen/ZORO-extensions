@@ -10,10 +10,11 @@ from jax import random
 alpha = 0.5
 
 #iterations
-K = 1000
+K = 1
 
 #dimension
 m = 5
+n = 5
 
 #rank
 r = 3
@@ -39,7 +40,7 @@ normvec[0] = jnp.linalg.norm(X)
 for k in range(1, K+1):
     key, subkey = random.split(key)
 
-    Z = random.normal(subkey, shape=(num_samples, m, m))
+    Z = random.normal(subkey, shape=(num_samples, m, n))
     
     X_plus_hZ = X[None, :, :] + h * Z
     
@@ -50,6 +51,8 @@ for k in range(1, K+1):
     f_X = f(X) 
     
     y = (f_XhZ - f_X) / h 
+
+    print(Z.shape[0])
 
     
 
