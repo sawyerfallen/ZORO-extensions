@@ -9,7 +9,7 @@ from jax import random
 #params
 
 #step size
-alpha = 0.00000005
+alpha = 0.05
 
 #iterations
 K = 1000
