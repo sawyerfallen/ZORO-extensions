@@ -2,6 +2,8 @@ import jax
 import jax.numpy as jnp
 import testfn
 import functools
+import sampalgs
+import math
 from jax import random
 
 #params
@@ -10,7 +12,7 @@ from jax import random
 alpha = 0.5
 
 #iterations
-K = 1
+K = 1000
 
 #dimension
 m = 5
@@ -24,6 +26,11 @@ num_samples = 3
 
 h = 0.0001
 
+tol = 10**(-6)
+
+#sampling algorithm iterations
+altProjiters = 100
+
 #function
 f = jax.jit(functools.partial(testfn.sing_val_sum, r = r))
 
@@ -31,7 +38,7 @@ f = jax.jit(functools.partial(testfn.sing_val_sum, r = r))
 #randomly initialize x0
 seed = 8566
 key = random.PRNGKey(seed)
-X = random.normal(key, shape=(m,m))
+X = random.normal(key, shape=(m,n))
 
 #norm vector
 normvec = [0] * K
@@ -52,13 +59,19 @@ for k in range(1, K+1):
     
     y = (f_XhZ - f_X) / h 
 
-    print(Z.shape[0])
 
-    
+    #low rank alg - alternating projections
+    gradfEst = sampalgs.altProj(y, Z, r, altProjiters)
+
+    #low rank alg - iht
+
+    #step
+    X = X - alpha*gradfEst
+    if(jnp.linalg.norm(gradfEst) < tol):
+        break
 
 
 
-#low rank alg - alternating projections
+output = X
 
-#low rank alg - iht
-
+print(output)
