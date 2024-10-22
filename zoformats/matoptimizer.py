@@ -1,10 +1,12 @@
 import jax
 import jax.numpy as jnp
+import matplotlib.pyplot
 import testfn
 import functools
 import sampalgs
 import math
 from jax import random
+import matplotlib
 
 #params
 
@@ -15,14 +17,14 @@ alpha = 0.05
 K = 1000
 
 #dimension
-m = 5
-n = 5
+m = 1000
+n = 1000
 
 #rank
 r = 2
 
 #number of sampling directions
-num_samples = 3
+num_samples = 6
 
 h = 0.001
 
@@ -41,8 +43,8 @@ key = random.PRNGKey(seed)
 X = random.normal(key, shape=(m,n))
 
 #norm vector
-normvec = [0] * K
-normvec[0] = jnp.linalg.norm(X)
+fnvalvec = [0] * K
+fnvalvec[0] = f(X)
 
 for k in range(1, K+1):
     print(k)
@@ -70,11 +72,12 @@ for k in range(1, K+1):
 
     #low rank alg - iht
     X = X - alpha*gradfEst
+    fnvalvec[k] = f(X)
     print(f(X))
     if(f(X) < tol):
         break
 
-
+#matplotlib.pyplot(gradvec)
 
 output = X
 
