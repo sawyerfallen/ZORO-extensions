@@ -1,6 +1,6 @@
 import jax
 import jax.numpy as jnp
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 import testfn
 import functools
 import sampalgs
@@ -17,8 +17,8 @@ alpha = 0.05
 K = 1000
 
 #dimension
-m = 1000
-n = 1000
+m = 10
+n = 10
 
 #rank
 r = 2
@@ -43,7 +43,7 @@ key = random.PRNGKey(seed)
 X = random.normal(key, shape=(m,n))
 
 #norm vector
-fnvalvec = [0] * K
+fnvalvec = [0] * (K+1)
 fnvalvec[0] = f(X)
 
 for k in range(1, K+1):
@@ -76,9 +76,15 @@ for k in range(1, K+1):
     print(f(X))
     if(f(X) < tol):
         break
+plt.plot(fnvalvec)
+plt.xlabel("Iteration")
+plt.ylabel("Function Value")
+plt.title("ZO for matricies")
+hyperparams_text = f"Iterations: {k}\nMatrix Size: ({n}, {m})\nSampled Directions: {num_samples}\nh: {h}\nRank: {r}\nAlternating projection Iterations: {altProjiters}"
+plt.text(len(fnvalvec) + 0.5, max(fnvalvec), hyperparams_text, ha='right', va='top', fontsize=10, bbox=dict(facecolor='lightgrey', alpha=0.5))
 
-#matplotlib.pyplot(gradvec)
 
+plt.show()
 output = X
 
 print(output)
